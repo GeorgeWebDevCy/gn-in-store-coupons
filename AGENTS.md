@@ -43,6 +43,9 @@ verified information changes how future work should be done.
 - Mail Mint 1.31.1 exposes CampaignTools::upsertCampaign/composeCampaignEmail;
   these native APIs write editable builder JSON and HTML. Use draft status and
   preserve the unsubscribe footer. Its edit route is #/campaign/regular/edit/ID.
+  Empty recipient lists revert to All Contacts in the editor after reload; an
+  empty selection is not a send safeguard. Verify draft/unscheduled status and
+  require audience review before sending.
 - The standard offer is EUR 15 off purchases of EUR 150 or more, with no expiry.
   Snapshot fixed amount, EUR currency, and minimum purchase on issuance. Staff
   verify the pre-discount purchase total in store; no till integration exists.
