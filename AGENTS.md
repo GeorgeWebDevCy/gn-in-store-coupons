@@ -56,6 +56,11 @@ verified information changes how future work should be done.
   They are search/display identifiers, not public bearer tokens or new redemption
   codes. Search supports formatted references and bare numeric IDs; keep the
   original random code and secret link unchanged. Previews use CPN-PREVIEW.
+- Sample recipient is a saved sample_user_id, never a hardcoded name or email.
+  Preview and sample emails use that user's full name (display-name fallback)
+  and email. Samples are non-redeemable, have no bearer link, do not enter the
+  ledger, and never consume eligibility. Sample sends require admin POST + nonce.
+  Customer-facing coupons and emails now display the customer's name and email.
 - Coupons are in-store only, one ever per normalized email and linked user ID.
   Never create WooCommerce shop_coupon records. Never delete the issuance ledger
   on redemption, revocation, expiry, deactivation, or uninstall.

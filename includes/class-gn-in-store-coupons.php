@@ -170,6 +170,7 @@ class Gn_In_Store_Coupons {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'menu' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
 		$this->loader->add_action( 'admin_post_gn_coupon_action', $plugin_admin, 'action' );
+		$this->loader->add_action( 'admin_post_gn_coupon_sample', $plugin_admin, 'send_sample' );
 
 	}
 

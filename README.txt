@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,7 @@ Issued coupons retain a snapshot of their discount and branding.
 The standard offer is EUR 15 off purchases of EUR 150 or more, with no expiry.
 Staff verify the purchase total before discount and record redemption before payment.
 The plugin does not connect to an in-store till or verify its transaction totals.
-Public coupon links are secret bearer links with no customer email address shown.
+Public coupon links are secret bearer links with the customer's name and email shown.
 Exclude the gn_store_coupon query parameter from any full-page/CDN cache.
 
 == Installation ==
@@ -79,6 +79,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.6.0 =
+* Display customer name and email on coupon pages and emails.
+* Add saved sample recipients and non-redeemable sample emails without using lifetime eligibility.
 
 = 1.5.0 =
 * Show permanent coupon references (CPN-000123) in admin, coupon pages and email subjects/bodies.

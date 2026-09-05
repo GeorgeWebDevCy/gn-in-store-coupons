@@ -48,6 +48,7 @@ class Gn_In_Store_Coupons_Admin {
 		$settings = array(
 			'enabled' => empty( $input['enabled'] ) ? 0 : 1,
 			'customer_enabled' => empty( $input['customer_enabled'] ) ? 0 : 1,
+			'sample_user_id' => get_userdata( absint( self::input( $input, 'sample_user_id' ) ) ) ? absint( self::input( $input, 'sample_user_id' ) ) : 0,
 			'customer_list' => in_array( absint( self::input( $input, 'customer_list' ) ), $list_ids, true ) ? absint( self::input( $input, 'customer_list' ) ) : 0,
 			'discount' => round( $discount, 2 ), 'minimum_purchase' => round( $minimum, 2 ), 'days' => min( 3650, absint( self::input( $input, 'days' ) ) ),
 			'lists' => array_values( array_intersect( array_map( 'absint', $lists ), $list_ids ) ),
@@ -89,8 +90,12 @@ class Gn_In_Store_Coupons_Admin {
 		<tr><th scope="row">Logo</th><td><input id="gn-logo" type="hidden" name="gn_coupons_settings[logo_id]" value="<?php echo esc_attr( $s['logo_id'] ); ?>"><div id="gn-logo-preview"><?php echo wp_get_attachment_image( $s['logo_id'], 'thumbnail' ); ?></div><button type="button" class="button" id="gn-select-logo"><span class="dashicons dashicons-format-image" aria-hidden="true"></span> Select logo</button> <button type="button" class="button" id="gn-remove-logo">Remove</button></td></tr>
 		<tr><th scope="row"><label for="gn-color">Brand color</label></th><td><input id="gn-color" type="color" name="gn_coupons_settings[color]" value="<?php echo esc_attr( $s['color'] ); ?>"></td></tr>
 		<tr><th scope="row"><label for="gn-terms">Coupon terms</label></th><td><textarea id="gn-terms" class="large-text" rows="4" name="gn_coupons_settings[terms]"><?php echo esc_textarea( $s['terms'] ); ?></textarea></td></tr>
-		</tbody></table><?php submit_button(); ?></form>
+		</tbody></table>
+		<h2>Sample Coupon</h2><table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="gn-sample-user">Sample user ID</label></th><td><input id="gn-sample-user" type="number" min="0" step="1" name="gn_coupons_settings[sample_user_id]" value="<?php echo esc_attr( $s['sample_user_id'] ); ?>"><?php $sample = Gn_In_Store_Coupons_Public::sample(); if ( $sample->email ) : ?><p><?php echo esc_html( $sample->customer_name . ' <' . $sample->email . '>' ); ?></p><?php endif; ?></td></tr></tbody></table>
+		<?php submit_button(); ?></form>
+		<?php if ( self::input( $_GET, 'sample_result' ) ) : ?><p role="status"><?php echo 'sent' === self::input( $_GET, 'sample_result' ) ? 'Sample accepted by the mailer.' : 'Sample not sent. Check the saved sample user and mail configuration.'; ?></p><?php endif; ?>
 		<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=gn_coupon_preview' ), 'gn_coupon_preview' ) ); ?>">Preview saved coupon</a>
+		<?php if ( $sample->email ) : ?><form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="gn-action" data-confirm="Send a non-redeemable sample to the saved sample recipient?"><?php wp_nonce_field( 'gn_coupon_sample' ); ?><input type="hidden" name="action" value="gn_coupon_sample"><button class="button" type="submit"><span class="dashicons dashicons-email" aria-hidden="true"></span> Email sample</button></form><?php endif; ?>
 		<?php require __DIR__ . '/partials/gn-in-store-coupons-marketing.php'; ?>
 		</div><?php
 	}
@@ -128,6 +133,15 @@ class Gn_In_Store_Coupons_Admin {
 		<?php endforeach; if ( ! $rows ) { echo '<tr><td colspan="7">No coupons found.</td></tr>'; } ?></tbody></table></div>
 		<div class="tablenav"><span><?php echo esc_html( $total ); ?> coupons</span> <?php echo wp_kses_post( paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => (int) ceil( $total / 25 ) ) ) ); ?></div></div>
 		<?php
+	}
+
+	public function send_sample() {
+		if ( ! current_user_can( 'manage_options' ) || 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { wp_die( 'Access denied.', '', array( 'response' => 403 ) ); }
+		check_admin_referer( 'gn_coupon_sample' );
+		$sample = Gn_In_Store_Coupons_Public::sample();
+		$sent = is_email( $sample->email ) && wp_mail( $sample->email, '[SAMPLE - NOT VALID] In-store coupon', Gn_In_Store_Coupons_Store::email_body( $sample ), array( 'Content-Type: text/html; charset=UTF-8' ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'gn-coupon-settings', 'sample_result' => $sent ? 'sent' : 'failed' ), admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	public static function date( $date ) { return $date ? get_date_from_gmt( $date, 'j M Y H:i' ) : 'No expiry'; }

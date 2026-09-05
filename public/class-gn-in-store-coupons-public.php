@@ -19,10 +19,15 @@ class Gn_In_Store_Coupons_Public {
 	public function preview() {
 		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Access denied.', '', array( 'response' => 403 ) ); }
 		check_admin_referer( 'gn_coupon_preview' );
+		$this->render( self::sample() );
+	}
+
+	public static function sample() {
 		$s = Gn_In_Store_Coupons_Store::settings();
-		$c = (object) array( 'status' => 'preview', 'code' => 'PREVIEW - NOT VALID', 'customer_name' => '', 'expires_at' => $s['days'] ? gmdate( 'Y-m-d H:i:s', time() + $s['days'] * DAY_IN_SECONDS ) : null,
+		$user = $s['sample_user_id'] ? get_userdata( $s['sample_user_id'] ) : false;
+		$name = $user ? trim( $user->first_name . ' ' . $user->last_name ) : '';
+		return (object) array( 'status' => 'preview', 'code' => 'SAMPLE - NOT VALID', 'customer_name' => $user ? ( $name ?: $user->display_name ) : '', 'email' => $user ? $user->user_email : '', 'expires_at' => $s['days'] ? gmdate( 'Y-m-d H:i:s', time() + $s['days'] * DAY_IN_SECONDS ) : null,
 			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'discount_type' => 'fixed', 'currency' => 'EUR', 'minimum_purchase' => $s['minimum_purchase'], 'terms' => $s['terms'] ) ) );
-		$this->render( $c );
 	}
 
 	private function render( $coupon ) {

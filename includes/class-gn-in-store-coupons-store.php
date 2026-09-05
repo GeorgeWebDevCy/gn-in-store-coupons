@@ -46,7 +46,7 @@ class Gn_In_Store_Coupons_Store {
 	public static function settings() {
 		return wp_parse_args( get_option( 'gn_coupons_settings', array() ), array(
 			'enabled' => 0, 'customer_enabled' => 0, 'customer_list' => 0, 'discount' => 15, 'minimum_purchase' => 150, 'days' => 0,
-			'lists' => array(), 'brand' => get_bloginfo( 'name' ),
+			'lists' => array(), 'sample_user_id' => 0, 'brand' => get_bloginfo( 'name' ),
 			'logo_id' => get_theme_mod( 'custom_logo', 0 ), 'color' => '#2271b1',
 			'terms' => 'Valid in store only. Present this coupon before payment. One use only. Cannot be exchanged for cash.',
 		) );
@@ -162,18 +162,26 @@ class Gn_In_Store_Coupons_Store {
 				continue;
 			}
 			$offer = json_decode( $coupon->offer, true );
-			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
-			$body .= '<p>' . esc_html( self::purchase_label( $offer ) ) . '</p>';
-			$body .= '<p>Coupon ID: <strong>' . esc_html( self::reference( $coupon ) ) . '</strong></p>';
-			$body .= '<p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p><p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>';
-			$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
-			if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }
-			$body .= '<p>' . esc_html( $offer['terms'] ) . '</p><p>In-store use only. This code does not work at online checkout.</p>';
+			$body = self::email_body( $coupon );
 			$sent = wp_mail( $coupon->email, sprintf( 'Your %s in-store coupon [%s]', $offer['brand'], self::reference( $coupon ) ), $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
 			$wpdb->update( $table, array( 'mail_status' => $sent ? 'sent' : 'failed' ), array( 'id' => $id ) );
 		}
 		if ( count( $ids ) === 25 && ! wp_next_scheduled( 'gn_coupons_send' ) ) {
 			wp_schedule_single_event( time() + 60, 'gn_coupons_send' );
 		}
+	}
+
+	public static function email_body( $coupon ) {
+		$offer = json_decode( $coupon->offer, true );
+		$sample = 'preview' === $coupon->status;
+		$body = '<h1 style="font-size:26px">' . esc_html( $offer['brand'] ) . '</h1><p>' . ( $sample ? 'SAMPLE - NOT VALID FOR REDEMPTION' : 'Your in-store coupon is ready.' ) . '</p><p style="font-size:42px"><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
+		$body .= '<p>' . esc_html( self::purchase_label( $offer ) ) . '</p>';
+		$body .= '<p>Coupon ID: <strong>' . esc_html( self::reference( $coupon ) ) . '</strong></p><p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p>';
+		$body .= '<p>Customer: ' . esc_html( $coupon->customer_name ) . '<br>Email: ' . esc_html( $coupon->email ) . '</p>';
+		if ( ! $sample ) { $body .= '<p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>'; }
+		$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
+		if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }
+		$body .= '<p>' . esc_html( $offer['terms'] ) . '</p><p>In-store use only. This code does not work at online checkout.</p>';
+		return '<div style="max-width:560px;margin:auto;padding:24px;border-top:8px solid ' . esc_attr( sanitize_hex_color( $offer['color'] ) ?: '#db3340' ) . ';font:16px/1.5 Arial,sans-serif;text-align:center;color:#202124;background:#ffffff;overflow-wrap:anywhere">' . $body . '</div>';
 	}
 }
