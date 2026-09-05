@@ -16,6 +16,17 @@ verified information changes how future work should be done.
 - Before finishing a task, check whether its discoveries or decisions warrant an
   update to this file. Include any warranted update in the same task.
 
+## Commits and Pushes
+
+- Commit and push completed work as we go, at meaningful checkpoints and before
+  finishing each task that changes files.
+- Run checks appropriate to the change before committing, and use clear commit
+  messages describing the completed work.
+- Routine commits and pushes are authorized by the user; do not ask for repeated
+  confirmation. Include only changes belonging to the task.
+- If a commit or push fails, resolve the issue when possible and report any
+  remaining blocker. Do not force-push unless explicitly authorized.
+
 <!-- codebase-memory-mcp:start -->
 # Codebase Memory
 
