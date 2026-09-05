@@ -67,8 +67,9 @@ verified information changes how future work should be done.
   source in this mode. The hourly scan still drains this permitted email queue.
 - Registration uses woocommerce_created_customer at priority 20 and a delayed
   user_register role check. Native ContactData/ContactModel and group pivot APIs
-  add list membership. New contacts are pending (registration is not newsletter
-  consent); never overwrite an existing subscription status. Sync failures retry
+  add list membership. Per explicit store-owner instruction, new contacts default
+  to subscribed, without recording explicit consent; never overwrite an existing
+  subscription status. Sync failures retry
   three times through gn_coupons_customer. Lifetime ledger checks still apply.
 - Use Mail Mint ContactModel/ContactGroupModel/ContactGroupPivotModel APIs.
   Hooks verified on the site: mailmint_list_applied (lists, contact IDs) and

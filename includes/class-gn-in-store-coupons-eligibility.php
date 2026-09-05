@@ -42,10 +42,10 @@ class Gn_In_Store_Coupons_Eligibility {
 		$email = strtolower( trim( $user->user_email ) );
 		$id = \Mint\MRM\DataBase\Models\ContactModel::get_id_by_email( $email );
 		if ( ! $id ) {
-			// Account creation is not newsletter consent. Existing statuses are never overwritten.
+			// Store policy subscribes new contacts; this is not an explicit consent record.
 			$data = new \Mint\MRM\DataStores\ContactData( $email, array(
 				'first_name' => $user->first_name, 'last_name' => $user->last_name,
-				'wp_user_id' => $user->ID, 'source' => 'WooCommerce', 'status' => 'pending',
+				'wp_user_id' => $user->ID, 'source' => 'WooCommerce', 'status' => 'subscribed',
 			) );
 			$id = \Mint\MRM\DataBase\Models\ContactModel::insert( $data );
 		}

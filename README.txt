@@ -31,9 +31,10 @@ retained on uninstall to avoid accidentally resetting lifetime eligibility.
 New customer issuance can be enabled separately from full automatic issuance.
 My Account and checkout registrations use WooCommerce's customer-created event.
 Choose a new-customer Mail Mint list to add these customers without activating
-list-wide coupon emails. New CRM contacts are pending; existing marketing consent
-and unsubscribe statuses are preserved. Account creation alone is not newsletter
-opt-in. Coupon email delivery is independent of newsletter subscription status.
+list-wide coupon emails. New CRM contacts are subscribed by default under the
+store's configured policy; existing subscription and unsubscribe statuses are
+preserved. This does not record explicit marketing consent. Coupon email delivery
+is independent of newsletter subscription status.
 List sync failures retry up to three times without reissuing an existing coupon.
 
 Issuance starts paused. In In-Store Coupons > Settings, choose the coupon amount and minimum purchase,
