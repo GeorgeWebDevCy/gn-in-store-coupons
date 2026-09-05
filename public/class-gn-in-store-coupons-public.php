@@ -21,7 +21,7 @@ class Gn_In_Store_Coupons_Public {
 		check_admin_referer( 'gn_coupon_preview' );
 		$s = Gn_In_Store_Coupons_Store::settings();
 		$c = (object) array( 'status' => 'preview', 'code' => 'PREVIEW - NOT VALID', 'customer_name' => '', 'expires_at' => $s['days'] ? gmdate( 'Y-m-d H:i:s', time() + $s['days'] * DAY_IN_SECONDS ) : null,
-			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'terms' => $s['terms'] ) ) );
+			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'discount_type' => 'fixed', 'currency' => 'EUR', 'minimum_purchase' => $s['minimum_purchase'], 'terms' => $s['terms'] ) ) );
 		$this->render( $c );
 	}
 

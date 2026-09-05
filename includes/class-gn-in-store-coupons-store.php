@@ -45,7 +45,7 @@ class Gn_In_Store_Coupons_Store {
 
 	public static function settings() {
 		return wp_parse_args( get_option( 'gn_coupons_settings', array() ), array(
-			'enabled' => 0, 'discount' => 10, 'days' => 30,
+			'enabled' => 0, 'discount' => 15, 'minimum_purchase' => 150, 'days' => 0,
 			'lists' => array(), 'brand' => get_bloginfo( 'name' ),
 			'logo_id' => get_theme_mod( 'custom_logo', 0 ), 'color' => '#2271b1',
 			'terms' => 'Valid in store only. Present this coupon before payment. One use only. Cannot be exchanged for cash.',
@@ -55,6 +55,19 @@ class Gn_In_Store_Coupons_Store {
 	public static function get( $id ) {
 		global $wpdb;
 		return $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . self::table() . ' WHERE id = %d', $id ) );
+	}
+
+	public static function discount_label( $offer ) {
+		return 'fixed' === ( $offer['discount_type'] ?? 'percent' )
+			? self::euros( $offer['discount'] ) : $offer['discount'] . '%';
+	}
+
+	public static function euros( $amount ) {
+		return html_entity_decode( '&euro;', ENT_QUOTES, 'UTF-8' ) . number_format( (float) $amount, (float) $amount == (int) $amount ? 0 : 2, '.', ',' );
+	}
+
+	public static function purchase_label( $offer ) {
+		return empty( $offer['minimum_purchase'] ) ? '' : 'On purchases of ' . self::euros( $offer['minimum_purchase'] ) . ' or more';
 	}
 
 	public static function status( $coupon ) {
@@ -72,8 +85,9 @@ class Gn_In_Store_Coupons_Store {
 			return new WP_Error( 'email', 'A valid email address is required.' );
 		}
 		$discount = (float) $settings['discount'];
-		if ( $discount <= 0 || $discount > 100 ) {
-			return new WP_Error( 'discount', 'Set a discount between 0.01 and 100.' );
+		$minimum = (float) $settings['minimum_purchase'];
+		if ( ! is_finite( $discount ) || ! is_finite( $minimum ) || $discount < 0.01 || $minimum < $discount ) {
+			return new WP_Error( 'discount', 'Set a positive coupon amount and a minimum purchase at least equal to it.' );
 		}
 		$hash = hash( 'sha256', $email );
 		$table = self::table();
@@ -82,7 +96,7 @@ class Gn_In_Store_Coupons_Store {
 			return new WP_Error( 'already_issued', 'This customer has already received their lifetime coupon.' );
 		}
 		$offer = array(
-			'discount' => $discount,
+			'discount' => round( $discount, 2 ), 'discount_type' => 'fixed', 'currency' => 'EUR', 'minimum_purchase' => round( $minimum, 2 ),
 			'brand' => $settings['brand'], 'logo' => wp_get_attachment_image_url( $settings['logo_id'], 'medium' ),
 			'color' => $settings['color'], 'terms' => $settings['terms'],
 		);
@@ -142,7 +156,8 @@ class Gn_In_Store_Coupons_Store {
 				continue;
 			}
 			$offer = json_decode( $coupon->offer, true );
-			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( $offer['discount'] ) . '% off</strong></p>';
+			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
+			$body .= '<p>' . esc_html( self::purchase_label( $offer ) ) . '</p>';
 			$body .= '<p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p><p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>';
 			$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
 			if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }

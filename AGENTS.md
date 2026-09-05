@@ -31,6 +31,10 @@ verified information changes how future work should be done.
 
 ## Plugin Updates
 
+- The standard offer is EUR 15 off purchases of EUR 150 or more, with no expiry.
+  Snapshot fixed amount, EUR currency, and minimum purchase on issuance. Staff
+  verify the pre-discount purchase total in store; no till integration exists.
+  Preserve legacy percentage offer snapshots when rendering older records.
 - Coupons have no product category restrictions. Do not add category selectors,
   category validation, or category captions to coupon settings, views, or emails.
 - Coupons are in-store only, one ever per normalized email and linked user ID.

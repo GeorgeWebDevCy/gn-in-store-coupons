@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ customers and subscribed contacts in selected Mail Mint lists. Coupons are
 emailed automatically when issuance is enabled. They never work at online checkout.
 
 The In-Store Coupons admin menu contains a searchable register and settings for
-discount percentage, expiry, store logo, color, and terms.
+coupon amount in EUR, minimum purchase, expiry, store logo, color, and terms.
 Administrators configure issuance; administrators and WooCommerce shop managers
 can inspect, redeem, revoke, and resend the same coupon.
 
@@ -28,7 +28,7 @@ retained on uninstall to avoid accidentally resetting lifetime eligibility.
 
 == Configuration ==
 
-Issuance starts paused. In In-Store Coupons > Settings, choose the discount,
+Issuance starts paused. In In-Store Coupons > Settings, choose the coupon amount and minimum purchase,
 validity (0 means no expiry), branding and Mail Mint
 lists. Enabling automatic issuance emails both existing subscribed contacts in
 those lists and future eligible customers. Mail Mint Pro is not required.
@@ -41,7 +41,9 @@ An interrupted send remains unconfirmed; staff may retry the same coupon after
 10 minutes, which can resend a previously accepted email.
 
 Issued coupons retain a snapshot of their discount and branding.
-Staff record redemption before completing payment.
+The standard offer is EUR 15 off purchases of EUR 150 or more, with no expiry.
+Staff verify the purchase total before discount and record redemption before payment.
+The plugin does not connect to an in-store till or verify its transaction totals.
 Public coupon links are secret bearer links with no customer email address shown.
 Exclude the gn_store_coupon query parameter from any full-page/CDN cache.
 
@@ -68,6 +70,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add fixed EUR coupons and minimum purchase amounts, defaulting to EUR 15 off EUR 150 with no expiry.
+* Show the purchase requirement on coupons, emails and staff details; preserve legacy percentage snapshots.
 
 = 1.1.2 =
 * Remove product category restrictions and category controls from all coupon screens.
