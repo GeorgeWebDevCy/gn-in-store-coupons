@@ -16,6 +16,19 @@ verified information changes how future work should be done.
 - Before finishing a task, check whether its discoveries or decisions warrant an
   update to this file. Include any warranted update in the same task.
 
+## Development Tooling
+
+- Keep agent and development tooling outside the plugin repository. Never commit
+  or ship it with the plugin.
+- Install tools such as Playwright in a separate tools directory or use an
+  existing MCP installation. Do not add tooling dependencies, package manifests,
+  lockfiles, browser binaries, or node_modules to this repository.
+- Keep browser profiles, credentials, MCP configuration, temporary test scripts,
+  screenshots, traces, reports, and caches outside the repository and release ZIPs.
+- Use available browser tooling to inspect and verify UI changes visually.
+- Review staged files before every commit to ensure tooling and generated
+  artifacts are excluded. Only plugin runtime dependencies belong in the plugin.
+
 ## Commits and Pushes
 
 - Commit and push completed work as we go, at meaningful checkpoints and before
