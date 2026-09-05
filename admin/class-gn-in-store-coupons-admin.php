@@ -139,7 +139,7 @@ class Gn_In_Store_Coupons_Admin {
 		if ( ! current_user_can( 'manage_options' ) || 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { wp_die( 'Access denied.', '', array( 'response' => 403 ) ); }
 		check_admin_referer( 'gn_coupon_sample' );
 		$sample = Gn_In_Store_Coupons_Public::sample();
-		$sent = is_email( $sample->email ) && wp_mail( $sample->email, '[SAMPLE - NOT VALID] In-store coupon', Gn_In_Store_Coupons_Store::email_body( $sample ), array( 'Content-Type: text/html; charset=UTF-8' ) );
+		$sent = is_email( $sample->email ) && wp_mail( $sample->email, 'Your in-store coupon', Gn_In_Store_Coupons_Store::email_body( $sample ), array( 'Content-Type: text/html; charset=UTF-8' ) );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'gn-coupon-settings', 'sample_result' => $sent ? 'sent' : 'failed' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}

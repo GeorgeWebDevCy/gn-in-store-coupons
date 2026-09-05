@@ -174,7 +174,7 @@ class Gn_In_Store_Coupons_Store {
 	public static function email_body( $coupon ) {
 		$offer = json_decode( $coupon->offer, true );
 		$sample = 'preview' === $coupon->status;
-		$body = '<h1 style="font-size:26px">' . esc_html( $offer['brand'] ) . '</h1><p>' . ( $sample ? 'SAMPLE - NOT VALID FOR REDEMPTION' : 'Your in-store coupon is ready.' ) . '</p><p style="font-size:42px"><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
+		$body = '<h1 style="font-size:26px">' . esc_html( $offer['brand'] ) . '</h1><p>' . 'Your in-store coupon is ready.' . '</p><p style="font-size:42px"><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
 		$body .= '<p>' . esc_html( self::purchase_label( $offer ) ) . '</p>';
 		$body .= '<p>Coupon ID: <strong>' . esc_html( self::reference( $coupon ) ) . '</strong></p><p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p>';
 		$body .= '<p>Customer: ' . esc_html( $coupon->customer_name ) . '<br>Email: ' . esc_html( $coupon->email ) . '</p>';

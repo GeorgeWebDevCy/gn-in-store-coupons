@@ -60,6 +60,7 @@ verified information changes how future work should be done.
   Preview and sample emails use that user's full name (display-name fallback)
   and email. Samples are non-redeemable, have no bearer link, do not enter the
   ledger, and never consume eligibility. Sample sends require admin POST + nonce.
+  Samples use neutral preview codes without an invalid-sample warning.
   Customer-facing coupons and emails now display the customer's name and email.
 - Coupons are in-store only, one ever per normalized email and linked user ID.
   Never create WooCommerce shop_coupon records. Never delete the issuance ledger
