@@ -52,6 +52,10 @@ verified information changes how future work should be done.
   Preserve legacy percentage offer snapshots when rendering older records.
 - Coupons have no product category restrictions. Do not add category selectors,
   category validation, or category captions to coupon settings, views, or emails.
+- Coupon references format the permanent ledger primary key as CPN-000123.
+  They are search/display identifiers, not public bearer tokens or new redemption
+  codes. Search supports formatted references and bare numeric IDs; keep the
+  original random code and secret link unchanged. Previews use CPN-PREVIEW.
 - Coupons are in-store only, one ever per normalized email and linked user ID.
   Never create WooCommerce shop_coupon records. Never delete the issuance ledger
   on redemption, revocation, expiry, deactivation, or uninstall.

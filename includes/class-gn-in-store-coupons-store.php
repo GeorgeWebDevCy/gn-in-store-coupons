@@ -62,6 +62,10 @@ class Gn_In_Store_Coupons_Store {
 			? self::euros( $offer['discount'] ) : $offer['discount'] . '%';
 	}
 
+	public static function reference( $coupon ) {
+		return empty( $coupon->id ) ? 'CPN-PREVIEW' : 'CPN-' . str_pad( (string) $coupon->id, 6, '0', STR_PAD_LEFT );
+	}
+
 	public static function euros( $amount ) {
 		return html_entity_decode( '&euro;', ENT_QUOTES, 'UTF-8' ) . number_format( (float) $amount, (float) $amount == (int) $amount ? 0 : 2, '.', ',' );
 	}
@@ -160,11 +164,12 @@ class Gn_In_Store_Coupons_Store {
 			$offer = json_decode( $coupon->offer, true );
 			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( self::discount_label( $offer ) ) . ' off</strong></p>';
 			$body .= '<p>' . esc_html( self::purchase_label( $offer ) ) . '</p>';
+			$body .= '<p>Coupon ID: <strong>' . esc_html( self::reference( $coupon ) ) . '</strong></p>';
 			$body .= '<p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p><p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>';
 			$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
 			if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }
 			$body .= '<p>' . esc_html( $offer['terms'] ) . '</p><p>In-store use only. This code does not work at online checkout.</p>';
-			$sent = wp_mail( $coupon->email, sprintf( 'Your %s in-store coupon', $offer['brand'] ), $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+			$sent = wp_mail( $coupon->email, sprintf( 'Your %s in-store coupon [%s]', $offer['brand'], self::reference( $coupon ) ), $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
 			$wpdb->update( $table, array( 'mail_status' => $sent ? 'sent' : 'failed' ), array( 'id' => $id ) );
 		}
 		if ( count( $ids ) === 25 && ! wp_next_scheduled( 'gn_coupons_send' ) ) {

@@ -107,7 +107,11 @@ class Gn_In_Store_Coupons_Admin {
 		if ( 'valid' === $status ) { $where .= " AND status = 'valid' AND (expires_at IS NULL OR expires_at > UTC_TIMESTAMP())"; }
 		elseif ( 'expired' === $status ) { $where .= " AND status = 'valid' AND expires_at <= UTC_TIMESTAMP()"; }
 		elseif ( 'all' !== $status ) { $where .= $wpdb->prepare( ' AND status = %s', $status ); }
-		if ( $search ) { $like = '%' . $wpdb->esc_like( $search ) . '%'; $where .= $wpdb->prepare( ' AND (code LIKE %s OR email LIKE %s OR customer_name LIKE %s)', $like, $like, $like ); }
+		if ( $search ) {
+			$like = '%' . $wpdb->esc_like( $search ) . '%';
+			$reference_id = preg_match( '/^(?:CPN-)?([0-9]+)$/iD', trim( $search ), $match ) ? absint( $match[1] ) : 0;
+			$where .= $wpdb->prepare( ' AND (id = %d OR code LIKE %s OR email LIKE %s OR customer_name LIKE %s)', $reference_id, $like, $like, $like );
+		}
 		$page = max( 1, absint( self::input( $_GET, 'paged', '1' ) ) );
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table WHERE $where" );
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY id DESC LIMIT 25 OFFSET %d", ( $page - 1 ) * 25 ) );
@@ -117,10 +121,10 @@ class Gn_In_Store_Coupons_Admin {
 		<nav class="nav-tab-wrapper" aria-label="Coupon status"><?php foreach ( array( 'valid', 'redeemed', 'expired', 'revoked', 'all' ) as $tab ) : ?>
 		<a class="nav-tab <?php echo $tab === $status ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array( 'page' => 'gn-in-store-coupons', 'status' => $tab ), admin_url( 'admin.php' ) ) ); ?>"><?php echo esc_html( ucfirst( $tab ) ); ?></a>
 		<?php endforeach; ?></nav>
-		<form method="get" class="gn-search"><input type="hidden" name="page" value="gn-in-store-coupons"><input type="hidden" name="status" value="<?php echo esc_attr( $status ); ?>"><label class="screen-reader-text" for="gn-search">Code, customer, or email</label><input type="search" id="gn-search" name="s" placeholder="Code, customer, or email" value="<?php echo esc_attr( $search ); ?>"><button class="button">Search</button></form>
-		<div class="gn-table"><table class="widefat striped"><thead><tr><th>Code</th><th>Customer</th><th>Discount</th><th>Issued</th><th>Expires</th><th>Status</th><th>Email</th></tr></thead><tbody>
+		<form method="get" class="gn-search"><input type="hidden" name="page" value="gn-in-store-coupons"><input type="hidden" name="status" value="<?php echo esc_attr( $status ); ?>"><label class="screen-reader-text" for="gn-search">ID, code, customer, or email</label><input type="search" id="gn-search" name="s" placeholder="ID, code, customer, or email" value="<?php echo esc_attr( $search ); ?>"><button class="button">Search</button></form>
+		<div class="gn-table"><table class="widefat striped"><thead><tr><th>Coupon ID / Code</th><th>Customer</th><th>Discount</th><th>Issued</th><th>Expires</th><th>Status</th><th>Email</th></tr></thead><tbody>
 		<?php foreach ( $rows as $c ) : $offer = json_decode( $c->offer, true ); ?>
-		<tr><td><a href="<?php echo esc_url( add_query_arg( array( 'page' => 'gn-in-store-coupons', 'coupon' => $c->id ), admin_url( 'admin.php' ) ) ); ?>"><code><?php echo esc_html( $c->code ); ?></code></a></td><td><?php echo esc_html( $c->customer_name ); ?><br><?php echo esc_html( $c->email ); ?></td><td><?php echo esc_html( Gn_In_Store_Coupons_Store::discount_label( $offer ) ); ?></td><td><?php echo esc_html( self::date( $c->issued_at ) ); ?></td><td><?php echo esc_html( self::date( $c->expires_at ) ); ?></td><td><?php echo esc_html( ucfirst( Gn_In_Store_Coupons_Store::status( $c ) ) ); ?></td><td><?php echo esc_html( self::mail_label( $c->mail_status ) ); ?></td></tr>
+		<tr><td><a href="<?php echo esc_url( add_query_arg( array( 'page' => 'gn-in-store-coupons', 'coupon' => $c->id ), admin_url( 'admin.php' ) ) ); ?>"><strong><?php echo esc_html( Gn_In_Store_Coupons_Store::reference( $c ) ); ?></strong></a><br><code><?php echo esc_html( $c->code ); ?></code></td><td><?php echo esc_html( $c->customer_name ); ?><br><?php echo esc_html( $c->email ); ?></td><td><?php echo esc_html( Gn_In_Store_Coupons_Store::discount_label( $offer ) ); ?></td><td><?php echo esc_html( self::date( $c->issued_at ) ); ?></td><td><?php echo esc_html( self::date( $c->expires_at ) ); ?></td><td><?php echo esc_html( ucfirst( Gn_In_Store_Coupons_Store::status( $c ) ) ); ?></td><td><?php echo esc_html( self::mail_label( $c->mail_status ) ); ?></td></tr>
 		<?php endforeach; if ( ! $rows ) { echo '<tr><td colspan="7">No coupons found.</td></tr>'; } ?></tbody></table></div>
 		<div class="tablenav"><span><?php echo esc_html( $total ); ?> coupons</span> <?php echo wp_kses_post( paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'current' => $page, 'total' => (int) ceil( $total / 25 ) ) ) ); ?></div></div>
 		<?php
@@ -137,7 +141,7 @@ class Gn_In_Store_Coupons_Admin {
 		if ( ! $c ) { wp_die( 'Coupon not found.', '', array( 'response' => 404 ) ); }
 		$offer = json_decode( $c->offer, true );
 		$status = Gn_In_Store_Coupons_Store::status( $c );
-		?><div class="wrap gn-coupons"><a href="<?php echo esc_url( admin_url( 'admin.php?page=gn-in-store-coupons' ) ); ?>">Back to coupons</a><h1><?php echo esc_html( $c->code ); ?></h1>
+		?><div class="wrap gn-coupons"><a href="<?php echo esc_url( admin_url( 'admin.php?page=gn-in-store-coupons' ) ); ?>">Back to coupons</a><h1><?php echo esc_html( Gn_In_Store_Coupons_Store::reference( $c ) ); ?></h1><p>Code: <code><?php echo esc_html( $c->code ); ?></code></p>
 		<?php if ( self::input( $_GET, 'result' ) ) : ?><div class="notice notice-info"><p><?php echo 'ok' === self::input( $_GET, 'result' ) ? 'Coupon updated.' : 'No change made. Check the current status before trying again.'; ?></p></div><?php endif; ?>
 		<table class="form-table" role="presentation"><tbody><?php
 		$actor = $c->changed_by ? get_userdata( $c->changed_by ) : null;
