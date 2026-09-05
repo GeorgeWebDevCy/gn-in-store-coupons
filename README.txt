@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.6.1
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.7.0 =
+* Queue a separate personalized coupon email for sent recipients of the linked Mail Mint campaign.
+* Preserve lifetime eligibility and leave unrelated list issuance paused.
 
 = 1.6.1 =
 * Remove the invalid-sample wording from personalized previews and sample emails.

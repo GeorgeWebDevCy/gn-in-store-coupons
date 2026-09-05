@@ -81,7 +81,7 @@ class Gn_In_Store_Coupons_Store {
 	public static function issue( $email, $name, $source, $user_id = 0 ) {
 		global $wpdb;
 		$settings = self::settings();
-		if ( ! $settings['enabled'] && ! ( 'woocommerce' === $source && $settings['customer_enabled'] ) ) {
+		if ( ! $settings['enabled'] && ! ( 'woocommerce' === $source && $settings['customer_enabled'] ) && ! ( 'mail_mint_campaign' === $source && get_option( 'gn_coupons_delivery_campaign_id', 0 ) ) ) {
 			return new WP_Error( 'paused', 'Coupon issuance is paused.' );
 		}
 		$email = strtolower( trim( $email ) );
@@ -145,11 +145,15 @@ class Gn_In_Store_Coupons_Store {
 	public static function send_pending() {
 		global $wpdb;
 		$settings = self::settings();
-		if ( ( ! $settings['enabled'] && ! $settings['customer_enabled'] ) || ! Gn_In_Store_Coupons_Eligibility::ready() ) {
+		$campaign_enabled = (bool) get_option( 'gn_coupons_delivery_campaign_id', 0 );
+		if ( ( ! $settings['enabled'] && ! $settings['customer_enabled'] && ! $campaign_enabled ) || ! Gn_In_Store_Coupons_Eligibility::ready() ) {
 			return;
 		}
 		$table = self::table();
-		$source_filter = $settings['enabled'] ? '' : " AND source = 'woocommerce'";
+		$sources = array();
+		if ( $settings['customer_enabled'] ) { $sources[] = "'woocommerce'"; }
+		if ( $campaign_enabled ) { $sources[] = "'mail_mint_campaign'"; }
+		$source_filter = $settings['enabled'] ? '' : ' AND source IN (' . implode( ',', $sources ) . ')';
 		$ids = $wpdb->get_col( "SELECT id FROM $table WHERE mail_status = 'pending' AND status = 'valid' AND (expires_at IS NULL OR expires_at > UTC_TIMESTAMP()) $source_filter ORDER BY id LIMIT 25" );
 		foreach ( $ids as $id ) {
 			$claimed = $wpdb->query( $wpdb->prepare( "UPDATE $table SET mail_status = 'sending', mail_attempted_at = %s WHERE id = %d AND mail_status = 'pending'", gmdate( 'Y-m-d H:i:s' ), $id ) );

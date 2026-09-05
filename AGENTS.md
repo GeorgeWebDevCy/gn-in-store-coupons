@@ -56,6 +56,13 @@ verified information changes how future work should be done.
   They are search/display identifiers, not public bearer tokens or new redemption
   codes. Search supports formatted references and bare numeric IDs; keep the
   original random code and secret link unchanged. Previews use CPN-PREVIEW.
+- Campaign delivery is explicitly linked by gn_coupons_delivery_campaign_id.
+  Scan Mail Mint broadcast rows with status sent and email_type campaign; only
+  still-subscribed matching contacts qualify. Never issue from drafts/test sends.
+  Batch/start/completion hooks wake a bounded 50-recipient scan; hourly recovery
+  and minute continuations cover both Mail Mint sending engines. Ledger uniqueness
+  excludes existing coupons, including redeemed/revoked ones. Coupon emails use
+  source mail_mint_campaign independently of the bulk-list issuance switch.
 - Sample recipient is a saved sample_user_id, never a hardcoded name or email.
   Preview and sample emails use that user's full name (display-name fallback)
   and email. Samples are non-redeemable, have no bearer link, do not enter the

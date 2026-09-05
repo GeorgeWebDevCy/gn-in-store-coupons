@@ -87,6 +87,10 @@ class Gn_In_Store_Coupons {
 		$this->loader->add_action( 'gn_coupons_scan', 'Gn_In_Store_Coupons_Eligibility', 'scan' );
 		$this->loader->add_action( 'gn_coupons_scan_soon', 'Gn_In_Store_Coupons_Eligibility', 'scan' );
 		$this->loader->add_action( 'gn_coupons_send', 'Gn_In_Store_Coupons_Store', 'send_pending' );
+		$this->loader->add_action( 'gn_coupons_campaign', 'Gn_In_Store_Coupons_Eligibility', 'campaign_scan' );
+		$this->loader->add_action( 'mailmint_after_campaign_start', 'Gn_In_Store_Coupons_Eligibility', 'campaign_wake' );
+		$this->loader->add_action( 'mailmint_batch_email_sent', 'Gn_In_Store_Coupons_Eligibility', 'campaign_wake' );
+		$this->loader->add_action( 'mailmint_campaign_email_sent', 'Gn_In_Store_Coupons_Eligibility', 'campaign_wake' );
 
 	}
 

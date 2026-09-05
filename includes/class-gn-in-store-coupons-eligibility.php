@@ -87,6 +87,7 @@ class Gn_In_Store_Coupons_Eligibility {
 	}
 
 	public static function scan() {
+		self::campaign_scan();
 		$settings = Gn_In_Store_Coupons_Store::settings();
 		if ( ! self::ready() ) {
 			return;
@@ -105,5 +106,34 @@ class Gn_In_Store_Coupons_Eligibility {
 			}
 		}
 		Gn_In_Store_Coupons_Store::send_pending();
+	}
+
+	public static function campaign_wake() {
+		if ( get_option( 'gn_coupons_delivery_campaign_id', 0 ) && ! wp_next_scheduled( 'gn_coupons_campaign' ) ) {
+			wp_schedule_single_event( time() + 60, 'gn_coupons_campaign' );
+		}
+	}
+
+	public static function campaign_scan() {
+		global $wpdb;
+		$campaign = absint( get_option( 'gn_coupons_delivery_campaign_id', 0 ) );
+		if ( ! $campaign || ! self::ready() ) { return; }
+		$table = Gn_In_Store_Coupons_Store::table();
+		// Read actual sent recipients, never the draft audience or unsent/test emails.
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT DISTINCT b.email_address, c.first_name, c.last_name, u.ID AS user_id
+			FROM {$wpdb->prefix}mint_broadcast_emails b
+			JOIN {$wpdb->prefix}mint_contacts c ON c.id = b.contact_id AND c.email = b.email_address
+			LEFT JOIN {$wpdb->users} u ON u.user_email = b.email_address
+			WHERE b.campaign_id = %d AND b.email_type = 'campaign' AND b.status = 'sent' AND c.status = 'subscribed'
+			AND NOT EXISTS (SELECT 1 FROM $table g WHERE g.email_hash = SHA2(LOWER(TRIM(b.email_address)), 256) OR (u.ID > 0 AND g.user_id = u.ID))
+			LIMIT 50", $campaign
+		) );
+		foreach ( (array) $rows as $row ) {
+			Gn_In_Store_Coupons_Store::issue( $row->email_address, trim( $row->first_name . ' ' . $row->last_name ), 'mail_mint_campaign', (int) $row->user_id );
+		}
+		Gn_In_Store_Coupons_Store::send_pending();
+		$pending = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}mint_broadcast_emails WHERE campaign_id = %d AND status IN ('scheduled','sending') LIMIT 1", $campaign ) );
+		if ( $pending || count( (array) $rows ) ) { self::campaign_wake(); }
 	}
 }
