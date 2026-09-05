@@ -12,5 +12,12 @@
 .gn-action { margin: 20px 0; }
 .gn-coupons .dashicons { vertical-align: middle; }
 #gn-logo-preview img { max-height: 100px; width: auto; margin-bottom: 12px; }
+.gn-marketing { border-top: 1px solid #c3c4c7; margin-top: 32px; padding-top: 16px; }
+.gn-marketing-formats { display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0 8px; }
+.gn-marketing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 420px)); gap: 24px; }
+.gn-marketing-asset { min-width: 0; }
+.gn-marketing-asset canvas { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #c3c4c7; box-sizing: border-box; }
+.gn-marketing-asset textarea { display: block; margin: 8px 0; resize: vertical; }
+@media (max-width: 782px) { .gn-marketing-grid { grid-template-columns: minmax(0, 420px); } }
 .gn-coupons .tablenav .page-numbers { margin: 0 6px; }
 @media (max-width: 782px) { .gn-coupons .form-table th { width: auto; } .gn-coupons .regular-text { max-width: 100%; } .gn-coupons .nav-tab { margin-left: 0; margin-right: 4px; } }

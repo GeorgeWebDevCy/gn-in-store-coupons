@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.3.0 =
+* Add Greek and English social PNGs in square and story formats, with matching captions in settings.
+* Link to the separately reviewed Mail Mint campaign without scheduling or sending it.
 
 = 1.2.0 =
 * Add fixed EUR coupons and minimum purchase amounts, defaulting to EUR 15 off EUR 150 with no expiry.

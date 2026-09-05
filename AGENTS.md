@@ -31,6 +31,18 @@ verified information changes how future work should be done.
 
 ## Plugin Updates
 
+- Marketing lives below the settings form: native canvas PNG exports (1080 square
+  and 1080x1920 story) and captions, Greek and English, use saved offer values.
+  Graphics are promotional, never redeemable codes. Keep exports/tooling outside
+  the repo; the canvas generator is plugin runtime code.
+- The Mail Mint announcement is one bilingual campaign, Greek first then English.
+  Leave campaigns draft, unscheduled and unsent unless the user explicitly asks
+  to send. The campaign is independent of automatic coupon issuance and must be
+  reviewed separately when offer settings change. Store its ID in the Options API
+  under gn_coupons_marketing_campaign_id, never hardcode site campaign IDs.
+- Mail Mint 1.31.1 exposes CampaignTools::upsertCampaign/composeCampaignEmail;
+  these native APIs write editable builder JSON and HTML. Use draft status and
+  preserve the unsubscribe footer. Its edit route is #/campaign/regular/edit/ID.
 - The standard offer is EUR 15 off purchases of EUR 150 or more, with no expiry.
   Snapshot fixed amount, EUR currency, and minimum purchase on issuance. Staff
   verify the pre-discount purchase total in store; no till integration exists.

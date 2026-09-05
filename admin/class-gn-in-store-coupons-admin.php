@@ -20,6 +20,9 @@ class Gn_In_Store_Coupons_Admin {
 		if ( ! in_array( self::input( $_GET, 'page' ), array( 'gn-in-store-coupons', 'gn-coupon-settings' ), true ) ) { return; }
 		if ( current_user_can( 'manage_options' ) ) { wp_enqueue_media(); }
 		wp_enqueue_script( 'gn-coupons-admin', plugin_dir_url( __FILE__ ) . 'js/gn-in-store-coupons-admin.js', array( 'jquery' ), $this->version, true );
+		if ( 'gn-coupon-settings' === self::input( $_GET, 'page' ) && current_user_can( 'manage_options' ) ) {
+			wp_enqueue_script( 'gn-coupons-marketing', plugin_dir_url( __FILE__ ) . 'js/gn-in-store-coupons-marketing.js', array(), $this->version, true );
+		}
 	}
 
 	public static function input( $data, $key, $default = '' ) {
@@ -83,6 +86,7 @@ class Gn_In_Store_Coupons_Admin {
 		<tr><th scope="row"><label for="gn-terms">Coupon terms</label></th><td><textarea id="gn-terms" class="large-text" rows="4" name="gn_coupons_settings[terms]"><?php echo esc_textarea( $s['terms'] ); ?></textarea></td></tr>
 		</tbody></table><?php submit_button(); ?></form>
 		<a class="button" target="_blank" rel="noopener" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=gn_coupon_preview' ), 'gn_coupon_preview' ) ); ?>">Preview saved coupon</a>
+		<?php require __DIR__ . '/partials/gn-in-store-coupons-marketing.php'; ?>
 		</div><?php
 	}
 
