@@ -16,7 +16,9 @@
  * Plugin Name:       GN In-Store Coupons
  * Plugin URI:        https://www.georgenicolaou.me/plugins/gn-in-store-coupons
  * Description:       This is a plugin that check if a user is already on a Mail Mint list or is a newly register WooCommerce customer and if so checks if they have received a coupon that has Store Branding and a unique code. The Discount Rate and Categories where the Coupon applies can be defined on a stand-alone settings screen in admin
- * Version:           1.0.0
+ * Version:           1.0.1
+ * Update URI:        https://github.com/GeorgeWebDevCy/gn-in-store-coupons
+ * Requires PHP:      5.6.20
  * Author:            George Nicolaou
  * Author URI:        https://www.georgenicolaou.me/
  * License:           GPL-2.0+
@@ -35,7 +37,24 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'GN_IN_STORE_COUPONS_VERSION', '1.0.0' );
+define( 'GN_IN_STORE_COUPONS_VERSION', '1.0.1' );
+
+/**
+ * Register GitHub updates in every WordPress context, including cron and WP-CLI.
+ */
+function gn_in_store_coupons_init_update_checker() {
+
+	require_once plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
+
+	$update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+		'https://github.com/GeorgeWebDevCy/gn-in-store-coupons/',
+		__FILE__,
+		'gn-in-store-coupons'
+	);
+	$update_checker->setBranch( 'main' );
+
+}
+add_action( 'plugins_loaded', 'gn_in_store_coupons_init_update_checker' );
 
 /**
  * The code that runs during plugin activation.

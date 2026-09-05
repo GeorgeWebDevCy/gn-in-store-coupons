@@ -29,6 +29,25 @@ verified information changes how future work should be done.
 - Review staged files before every commit to ensure tooling and generated
   artifacts are excluded. Only plugin runtime dependencies belong in the plugin.
 
+## Plugin Updates
+
+- GitHub updates are registered on plugins_loaded in gn-in-store-coupons.php.
+  The source is GeorgeWebDevCy/gn-in-store-coupons with main as the fallback branch.
+- Plugin Update Checker 5.7 is bundled in includes/plugin-update-checker as a
+  runtime dependency. Keep its upstream files and MIT license intact. Upstream
+  tag v5.7 points to commit 275a96a2a18d03c34c87f35cb68673c8c49ac3b1.
+- PUC prefers the latest non-prerelease GitHub release, then the highest version
+  tag, then main. Once releases exist, publish a newer release to deliver updates;
+  pushing only main will not supersede an existing release. Avoid prerelease
+  version tags because the tag fallback does not filter them out.
+- Keep the plugin Version header, GN_IN_STORE_COUPONS_VERSION, and README.txt
+  stable tag aligned. Add a changelog entry with each version bump.
+- Updates use GitHub source archives; include the runtime library in every
+  version. .gitattributes excludes AGENTS.md from these archives. Keep tooling
+  outside the repository and never include credentials in update configuration.
+- PHP syntax check: run php -l for each PHP file through rtk. Keep any integration
+  test harness outside the repository.
+
 ## Commits and Pushes
 
 - Commit and push completed work as we go, at meaningful checkpoints and before
