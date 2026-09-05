@@ -31,6 +31,8 @@ verified information changes how future work should be done.
 
 ## Plugin Updates
 
+- Coupons have no product category restrictions. Do not add category selectors,
+  category validation, or category captions to coupon settings, views, or emails.
 - Coupons are in-store only, one ever per normalized email and linked user ID.
   Never create WooCommerce shop_coupon records. Never delete the issuance ledger
   on redemption, revocation, expiry, deactivation, or uninstall.

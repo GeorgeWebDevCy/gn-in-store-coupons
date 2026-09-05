@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ customers and subscribed contacts in selected Mail Mint lists. Coupons are
 emailed automatically when issuance is enabled. They never work at online checkout.
 
 The In-Store Coupons admin menu contains a searchable register and settings for
-discount percentage, product categories, expiry, store logo, color, and terms.
+discount percentage, expiry, store logo, color, and terms.
 Administrators configure issuance; administrators and WooCommerce shop managers
 can inspect, redeem, revoke, and resend the same coupon.
 
@@ -29,7 +29,7 @@ retained on uninstall to avoid accidentally resetting lifetime eligibility.
 == Configuration ==
 
 Issuance starts paused. In In-Store Coupons > Settings, choose the discount,
-categories (none means all), validity (0 means no expiry), branding and Mail Mint
+validity (0 means no expiry), branding and Mail Mint
 lists. Enabling automatic issuance emails both existing subscribed contacts in
 those lists and future eligible customers. Mail Mint Pro is not required.
 
@@ -40,8 +40,8 @@ issuing another code. "Accepted by mailer" is not confirmation of inbox delivery
 An interrupted send remains unconfirmed; staff may retry the same coupon after
 10 minutes, which can resend a previously accepted email.
 
-Issued coupons retain a snapshot of their discount, categories and branding.
-Staff verify applicable products and record redemption before completing payment.
+Issued coupons retain a snapshot of their discount and branding.
+Staff record redemption before completing payment.
 Public coupon links are secret bearer links with no customer email address shown.
 Exclude the gn_store_coupon query parameter from any full-page/CDN cache.
 
@@ -68,6 +68,9 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.1.2 =
+* Remove product category restrictions and category controls from all coupon screens.
 
 = 1.1.1 =
 * Hide the generic all-categories caption on coupons and emails; retain selected category names.

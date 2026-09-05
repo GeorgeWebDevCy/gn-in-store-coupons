@@ -20,10 +20,8 @@ class Gn_In_Store_Coupons_Public {
 		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Access denied.', '', array( 'response' => 403 ) ); }
 		check_admin_referer( 'gn_coupon_preview' );
 		$s = Gn_In_Store_Coupons_Store::settings();
-		$names = array();
-		foreach ( $s['categories'] as $id ) { $term = get_term( $id, 'product_cat' ); if ( $term && ! is_wp_error( $term ) ) { $names[] = $term->name; } }
 		$c = (object) array( 'status' => 'preview', 'code' => 'PREVIEW - NOT VALID', 'customer_name' => '', 'expires_at' => $s['days'] ? gmdate( 'Y-m-d H:i:s', time() + $s['days'] * DAY_IN_SECONDS ) : null,
-			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'categories' => $names, 'terms' => $s['terms'] ) ) );
+			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'terms' => $s['terms'] ) ) );
 		$this->render( $c );
 	}
 

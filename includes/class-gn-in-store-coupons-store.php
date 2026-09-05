@@ -45,7 +45,7 @@ class Gn_In_Store_Coupons_Store {
 
 	public static function settings() {
 		return wp_parse_args( get_option( 'gn_coupons_settings', array() ), array(
-			'enabled' => 0, 'discount' => 10, 'days' => 30, 'categories' => array(),
+			'enabled' => 0, 'discount' => 10, 'days' => 30,
 			'lists' => array(), 'brand' => get_bloginfo( 'name' ),
 			'logo_id' => get_theme_mod( 'custom_logo', 0 ), 'color' => '#2271b1',
 			'terms' => 'Valid in store only. Present this coupon before payment. One use only. Cannot be exchanged for cash.',
@@ -81,16 +81,8 @@ class Gn_In_Store_Coupons_Store {
 		if ( $existing ) {
 			return new WP_Error( 'already_issued', 'This customer has already received their lifetime coupon.' );
 		}
-		$categories = array();
-		foreach ( $settings['categories'] as $id ) {
-			$term = get_term( $id, 'product_cat' );
-			if ( ! $term || is_wp_error( $term ) ) {
-				return new WP_Error( 'category', 'An eligible category no longer exists. Review coupon settings.' );
-			}
-			$categories[] = $term->name;
-		}
 		$offer = array(
-			'discount' => $discount, 'categories' => $categories, 'category_ids' => $settings['categories'],
+			'discount' => $discount,
 			'brand' => $settings['brand'], 'logo' => wp_get_attachment_image_url( $settings['logo_id'], 'medium' ),
 			'color' => $settings['color'], 'terms' => $settings['terms'],
 		);
@@ -152,9 +144,6 @@ class Gn_In_Store_Coupons_Store {
 			$offer = json_decode( $coupon->offer, true );
 			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( $offer['discount'] ) . '% off</strong></p>';
 			$body .= '<p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p><p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>';
-			if ( ! empty( $offer['categories'] ) ) {
-				$body .= '<p>Categories: ' . esc_html( implode( ', ', $offer['categories'] ) ) . '</p>';
-			}
 			$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
 			if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }
 			$body .= '<p>' . esc_html( $offer['terms'] ) . '</p><p>In-store use only. This code does not work at online checkout.</p>';
