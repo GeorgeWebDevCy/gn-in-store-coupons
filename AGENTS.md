@@ -31,6 +31,25 @@ verified information changes how future work should be done.
 
 ## Plugin Updates
 
+- Coupons are in-store only, one ever per normalized email and linked user ID.
+  Never create WooCommerce shop_coupon records. Never delete the issuance ledger
+  on redemption, revocation, expiry, deactivation, or uninstall.
+- The custom gn_in_store_coupons table provides unique email-hash/user-ID/code
+  indexes and conditional redemption writes. This table is required for atomic
+  lifetime deduplication; settings use the Options API.
+- Automatic issuance starts paused. Enabling sends to existing subscribed Mail
+  Mint contacts in selected lists and new WooCommerce customers. Never enable
+  issuance on a live store as a side effect of testing or deployment.
+- Use Mail Mint ContactModel/ContactGroupModel/ContactGroupPivotModel APIs.
+  Hooks verified on the site: mailmint_list_applied (lists, contact IDs) and
+  mint_subscriber_status_to_subscribed (contact ID). An hourly bounded scan covers
+  existing contacts and bulk/status changes. WooCommerce uses
+  woocommerce_created_customer; user_register defers a customer-role check.
+- All staff mutations require manage_woocommerce, POST and a nonce. Settings and
+  previews require manage_options. Retried emails reuse the same code.
+- Issued offer terms are snapshots; expiry is stored in UTC. Coupon links use a
+  256-bit bearer token and no-cache/noindex headers, with no theme analytics.
+
 - Activation requires WooCommerce (woocommerce) and Mail Mint (mail-mint),
   declared in the bootstrap Requires Plugins header. WordPress 6.5 is the minimum
   for native dependency enforcement. Mail Mint Pro is optional, not a substitute.

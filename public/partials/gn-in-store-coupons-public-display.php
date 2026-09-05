@@ -1,16 +1,9 @@
-<?php
-
-/**
- * Provide a public-facing view for the plugin
- *
- * This file is used to markup the public-facing aspects of the plugin.
- *
- * @link       https://www.georgenicolaou.me
- * @since      1.0.0
- *
- * @package    Gn_In_Store_Coupons
- * @subpackage Gn_In_Store_Coupons/public/partials
- */
-?>
-
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
+<!doctype html>
+<html <?php language_attributes(); ?>><head><meta charset="<?php bloginfo( 'charset' ); ?>"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title><?php echo esc_html( $offer['brand'] ); ?> - In-Store Coupon</title><link rel="stylesheet" href="<?php echo esc_url( plugin_dir_url( dirname( __FILE__ ) ) . 'css/gn-in-store-coupons-public.css?ver=' . GN_IN_STORE_COUPONS_VERSION ); ?>"></head>
+<body><main class="gn-coupon" style="--brand:<?php echo esc_attr( sanitize_hex_color( $offer['color'] ) ?: '#2271b1' ); ?>">
+<header><?php if ( $offer['logo'] ) : ?><img class="gn-logo" src="<?php echo esc_url( $offer['logo'] ); ?>" alt="<?php echo esc_attr( $offer['brand'] ); ?>"><?php endif; ?><h1><?php echo esc_html( $offer['brand'] ); ?></h1><p>In-store coupon</p></header>
+<section class="gn-offer"><p class="gn-status"><?php echo esc_html( ucfirst( $status ) ); ?></p><h2><?php echo esc_html( $offer['discount'] ); ?><span>% off</span></h2><p><?php echo esc_html( implode( ', ', $offer['categories'] ) ?: 'All product categories' ); ?></p></section>
+<section class="gn-code"><p>Coupon code</p><strong><?php echo esc_html( $coupon->code ); ?></strong><?php if ( $coupon->customer_name ) : ?><p><?php echo esc_html( $coupon->customer_name ); ?></p><?php endif; ?><p><?php echo $coupon->expires_at ? 'Valid until ' . esc_html( Gn_In_Store_Coupons_Admin::date( $coupon->expires_at ) ) : 'No expiry date'; ?></p></section>
+<footer><p><?php echo nl2br( esc_html( $offer['terms'] ) ); ?></p><p>In-store use only. Not valid at online checkout.</p><?php if ( 'valid' === $status ) : ?><p>Present this coupon to a member of staff before payment.</p><?php elseif ( 'preview' !== $status ) : ?><p>This coupon can no longer be redeemed.</p><?php endif; ?></footer>
+</main></body></html>

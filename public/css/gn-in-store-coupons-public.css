@@ -1,4 +1,16 @@
-/**
- * All of the CSS for your public-facing functionality should be
- * included in this file.
- */
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px 16px; background: #f0f2f4; color: #202124; font: 16px/1.5 Arial, sans-serif; letter-spacing: 0; }
+.gn-coupon { max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid #d4d8dc; border-top: 8px solid var(--brand); border-radius: 4px; text-align: center; overflow-wrap: anywhere; }
+header, .gn-offer, .gn-code, footer { padding: 24px; }
+header { border-bottom: 1px solid #e0e3e5; }
+.gn-logo { display: block; width: auto; max-width: 200px; height: auto; max-height: 100px; object-fit: contain; margin: 0 auto 16px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0; }
+p { margin: 8px 0; }
+h2 { font-size: 64px; line-height: 1.1; margin: 20px 0; }
+h2 span { font-size: 28px; }
+.gn-status { text-transform: uppercase; font-size: 14px; font-weight: bold; }
+.gn-code { border-block: 2px dashed #d4d8dc; }
+.gn-code strong { font: bold 22px/1.4 monospace; }
+footer { font-size: 14px; text-align: left; }
+@media (max-width: 400px) { body { padding: 16px 8px; } header, .gn-offer, .gn-code, footer { padding: 20px 16px; } .gn-code strong { font-size: 18px; } }
+@media print { body { background: #fff; padding: 0; } .gn-coupon { break-inside: avoid; } }

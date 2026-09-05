@@ -1,4 +1,16 @@
-/**
- * All of the CSS for your admin-specific functionality should be
- * included in this file.
- */
+.gn-coupons { max-width: 1400px; }
+.gn-coupons .form-table th { width: 230px; }
+.gn-coupons .form-table td { overflow-wrap: anywhere; }
+.gn-options { max-height: 220px; overflow: auto; padding: 4px; }
+.gn-options label { display: block; margin-bottom: 8px; }
+.gn-search { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.gn-search input[type=search] { width: 320px; max-width: 100%; }
+.gn-table { overflow-x: auto; }
+.gn-table table { min-width: 960px; }
+.gn-table td { max-width: 230px; overflow-wrap: anywhere; }
+.gn-table code { white-space: nowrap; font-size: 12px; }
+.gn-action { margin: 20px 0; }
+.gn-coupons .dashicons { vertical-align: middle; }
+#gn-logo-preview img { max-height: 100px; width: auto; margin-bottom: 12px; }
+.gn-coupons .tablenav .page-numbers { margin: 0 6px; }
+@media (max-width: 782px) { .gn-coupons .form-table th { width: auto; } .gn-coupons .regular-text { max-width: 100%; } .gn-coupons .nav-tab { margin-left: 0; margin-right: 4px; } }

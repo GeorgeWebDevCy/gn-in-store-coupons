@@ -30,7 +30,8 @@ class Gn_In_Store_Coupons_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
+		require_once __DIR__ . '/class-gn-in-store-coupons-store.php';
+		Gn_In_Store_Coupons_Store::install();
 	}
 
 }

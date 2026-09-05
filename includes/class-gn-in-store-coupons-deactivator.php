@@ -30,7 +30,9 @@ class Gn_In_Store_Coupons_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+		foreach ( array( 'gn_coupons_scan', 'gn_coupons_scan_soon', 'gn_coupons_send', 'gn_coupons_customer' ) as $hook ) {
+			wp_unschedule_hook( $hook );
+		}
 	}
 
 }

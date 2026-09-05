@@ -1,103 +1,40 @@
 <?php
-
-/**
- * The public-facing functionality of the plugin.
- *
- * @link       https://www.georgenicolaou.me
- * @since      1.0.0
- *
- * @package    Gn_In_Store_Coupons
- * @subpackage Gn_In_Store_Coupons/public
- */
-
-/**
- * The public-facing functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the public-facing stylesheet and JavaScript.
- *
- * @package    Gn_In_Store_Coupons
- * @subpackage Gn_In_Store_Coupons/public
- * @author     George Nicolaou <orionas.elite@gmail.com>
- */
+/** Private bearer-link coupon view, without theme analytics or checkout integration. */
 class Gn_In_Store_Coupons_Public {
+	public function __construct( $name, $version ) {}
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
-
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
-
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of the plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
-
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
-
+	public function display() {
+		global $wpdb;
+		if ( ! isset( $_GET['gn_store_coupon'] ) ) { return; }
+		$token = Gn_In_Store_Coupons_Admin::input( $_GET, 'gn_store_coupon' );
+		$c = preg_match( '/^[a-f0-9]{64}$/D', $token ) ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . Gn_In_Store_Coupons_Store::table() . ' WHERE token = %s', $token ) ) : null;
+		if ( ! $c ) {
+			nocache_headers();
+			header( 'X-Robots-Tag: noindex, nofollow' );
+			wp_die( 'Coupon not found.', 'Coupon not found', array( 'response' => 404 ) );
+		}
+		$this->render( $c );
 	}
 
-	/**
-	 * Register the stylesheets for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Gn_In_Store_Coupons_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Gn_In_Store_Coupons_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/gn-in-store-coupons-public.css', array(), $this->version, 'all' );
-
+	public function preview() {
+		if ( ! current_user_can( 'manage_options' ) ) { wp_die( 'Access denied.', '', array( 'response' => 403 ) ); }
+		check_admin_referer( 'gn_coupon_preview' );
+		$s = Gn_In_Store_Coupons_Store::settings();
+		$names = array();
+		foreach ( $s['categories'] as $id ) { $term = get_term( $id, 'product_cat' ); if ( $term && ! is_wp_error( $term ) ) { $names[] = $term->name; } }
+		$c = (object) array( 'status' => 'preview', 'code' => 'PREVIEW - NOT VALID', 'customer_name' => '', 'expires_at' => $s['days'] ? gmdate( 'Y-m-d H:i:s', time() + $s['days'] * DAY_IN_SECONDS ) : null,
+			'offer' => wp_json_encode( array( 'brand' => $s['brand'], 'logo' => wp_get_attachment_image_url( $s['logo_id'], 'medium' ), 'color' => $s['color'], 'discount' => $s['discount'], 'categories' => $names, 'terms' => $s['terms'] ) ) );
+		$this->render( $c );
 	}
 
-	/**
-	 * Register the JavaScript for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Gn_In_Store_Coupons_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Gn_In_Store_Coupons_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/gn-in-store-coupons-public.js', array( 'jquery' ), $this->version, false );
-
+	private function render( $coupon ) {
+		nocache_headers();
+		header( 'X-Robots-Tag: noindex, nofollow, noarchive' );
+		header( 'Referrer-Policy: no-referrer' );
+		header( 'X-Frame-Options: DENY' );
+		$offer = json_decode( $coupon->offer, true );
+		$status = Gn_In_Store_Coupons_Store::status( $coupon );
+		require plugin_dir_path( __FILE__ ) . 'partials/gn-in-store-coupons-public-display.php';
+		exit;
 	}
-
 }

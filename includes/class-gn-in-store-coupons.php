@@ -78,6 +78,15 @@ class Gn_In_Store_Coupons {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->loader->add_action( 'init', $this, 'initialize_coupons' );
+		$this->loader->add_action( 'woocommerce_created_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer' );
+		$this->loader->add_action( 'user_register', 'Gn_In_Store_Coupons_Eligibility', 'registration' );
+		$this->loader->add_action( 'gn_coupons_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer' );
+		$this->loader->add_action( 'mailmint_list_applied', 'Gn_In_Store_Coupons_Eligibility', 'list_applied', 10, 2 );
+		$this->loader->add_action( 'mint_subscriber_status_to_subscribed', 'Gn_In_Store_Coupons_Eligibility', 'contact' );
+		$this->loader->add_action( 'gn_coupons_scan', 'Gn_In_Store_Coupons_Eligibility', 'scan' );
+		$this->loader->add_action( 'gn_coupons_scan_soon', 'Gn_In_Store_Coupons_Eligibility', 'scan' );
+		$this->loader->add_action( 'gn_coupons_send', 'Gn_In_Store_Coupons_Store', 'send_pending' );
 
 	}
 
@@ -98,6 +107,8 @@ class Gn_In_Store_Coupons {
 	 * @access   private
 	 */
 	private function load_dependencies() {
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-gn-in-store-coupons-store.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-gn-in-store-coupons-eligibility.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -156,6 +167,9 @@ class Gn_In_Store_Coupons {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'menu' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+		$this->loader->add_action( 'admin_post_gn_coupon_action', $plugin_admin, 'action' );
 
 	}
 
@@ -170,8 +184,8 @@ class Gn_In_Store_Coupons {
 
 		$plugin_public = new Gn_In_Store_Coupons_Public( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'template_redirect', $plugin_public, 'display', 0 );
+		$this->loader->add_action( 'admin_post_gn_coupon_preview', $plugin_public, 'preview' );
 
 	}
 
@@ -182,6 +196,15 @@ class Gn_In_Store_Coupons {
 	 */
 	public function run() {
 		$this->loader->run();
+	}
+
+	public function initialize_coupons() {
+		if ( '1' !== get_option( 'gn_coupons_db_version' ) ) {
+			Gn_In_Store_Coupons_Store::install();
+		}
+		if ( ! wp_next_scheduled( 'gn_coupons_scan' ) ) {
+			wp_schedule_event( time() + 300, 'hourly', 'gn_coupons_scan' );
+		}
 	}
 
 	/**
