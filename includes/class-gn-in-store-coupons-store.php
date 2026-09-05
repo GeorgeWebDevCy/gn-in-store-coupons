@@ -45,7 +45,7 @@ class Gn_In_Store_Coupons_Store {
 
 	public static function settings() {
 		return wp_parse_args( get_option( 'gn_coupons_settings', array() ), array(
-			'enabled' => 0, 'discount' => 15, 'minimum_purchase' => 150, 'days' => 0,
+			'enabled' => 0, 'customer_enabled' => 0, 'customer_list' => 0, 'discount' => 15, 'minimum_purchase' => 150, 'days' => 0,
 			'lists' => array(), 'brand' => get_bloginfo( 'name' ),
 			'logo_id' => get_theme_mod( 'custom_logo', 0 ), 'color' => '#2271b1',
 			'terms' => 'Valid in store only. Present this coupon before payment. One use only. Cannot be exchanged for cash.',
@@ -77,7 +77,7 @@ class Gn_In_Store_Coupons_Store {
 	public static function issue( $email, $name, $source, $user_id = 0 ) {
 		global $wpdb;
 		$settings = self::settings();
-		if ( ! $settings['enabled'] ) {
+		if ( ! $settings['enabled'] && ! ( 'woocommerce' === $source && $settings['customer_enabled'] ) ) {
 			return new WP_Error( 'paused', 'Coupon issuance is paused.' );
 		}
 		$email = strtolower( trim( $email ) );
@@ -140,11 +140,13 @@ class Gn_In_Store_Coupons_Store {
 
 	public static function send_pending() {
 		global $wpdb;
-		if ( ! self::settings()['enabled'] || ! Gn_In_Store_Coupons_Eligibility::ready() ) {
+		$settings = self::settings();
+		if ( ( ! $settings['enabled'] && ! $settings['customer_enabled'] ) || ! Gn_In_Store_Coupons_Eligibility::ready() ) {
 			return;
 		}
 		$table = self::table();
-		$ids = $wpdb->get_col( "SELECT id FROM $table WHERE mail_status = 'pending' AND status = 'valid' AND (expires_at IS NULL OR expires_at > UTC_TIMESTAMP()) ORDER BY id LIMIT 25" );
+		$source_filter = $settings['enabled'] ? '' : " AND source = 'woocommerce'";
+		$ids = $wpdb->get_col( "SELECT id FROM $table WHERE mail_status = 'pending' AND status = 'valid' AND (expires_at IS NULL OR expires_at > UTC_TIMESTAMP()) $source_filter ORDER BY id LIMIT 25" );
 		foreach ( $ids as $id ) {
 			$claimed = $wpdb->query( $wpdb->prepare( "UPDATE $table SET mail_status = 'sending', mail_attempted_at = %s WHERE id = %d AND mail_status = 'pending'", gmdate( 'Y-m-d H:i:s' ), $id ) );
 			if ( 1 !== $claimed ) {

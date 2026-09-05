@@ -47,6 +47,8 @@ class Gn_In_Store_Coupons_Admin {
 		$logo = absint( self::input( $input, 'logo_id' ) );
 		$settings = array(
 			'enabled' => empty( $input['enabled'] ) ? 0 : 1,
+			'customer_enabled' => empty( $input['customer_enabled'] ) ? 0 : 1,
+			'customer_list' => in_array( absint( self::input( $input, 'customer_list' ) ), $list_ids, true ) ? absint( self::input( $input, 'customer_list' ) ) : 0,
 			'discount' => round( $discount, 2 ), 'minimum_purchase' => round( $minimum, 2 ), 'days' => min( 3650, absint( self::input( $input, 'days' ) ) ),
 			'lists' => array_values( array_intersect( array_map( 'absint', $lists ), $list_ids ) ),
 			'brand' => self::input( $input, 'brand' ) ?: get_bloginfo( 'name' ),
@@ -54,8 +56,9 @@ class Gn_In_Store_Coupons_Admin {
 			'color' => sanitize_hex_color( self::input( $input, 'color' ) ) ?: '#2271b1',
 			'terms' => isset( $input['terms'] ) && is_string( $input['terms'] ) ? sanitize_textarea_field( $input['terms'] ) : '',
 		);
-		if ( $settings['enabled'] && ! Gn_In_Store_Coupons_Eligibility::ready() ) {
+		if ( ( $settings['enabled'] || $settings['customer_enabled'] ) && ! Gn_In_Store_Coupons_Eligibility::ready() ) {
 			$settings['enabled'] = 0;
+			$settings['customer_enabled'] = 0;
 			add_settings_error( 'gn_coupons', 'dependencies', 'WooCommerce and Mail Mint must be active before enabling issuance.' );
 		}
 		if ( $settings['lists'] !== $old['lists'] || $settings['enabled'] !== $old['enabled'] ) { update_option( 'gn_coupons_scan_offset', 0, false ); }
@@ -72,6 +75,8 @@ class Gn_In_Store_Coupons_Admin {
 		<form action="options.php" method="post"><?php settings_fields( 'gn_coupons' ); ?>
 		<h2>Issuance</h2><table class="form-table" role="presentation"><tbody>
 		<tr><th scope="row">Automatic email issuance</th><td><label><input type="checkbox" name="gn_coupons_settings[enabled]" value="1" <?php checked( $s['enabled'] ); ?>> Enabled for new customers and subscribed contacts in the selected lists</label></td></tr>
+		<tr><th scope="row">New customer issuance</th><td><label><input type="checkbox" name="gn_coupons_settings[customer_enabled]" value="1" <?php checked( $s['customer_enabled'] ); ?>> Email new WooCommerce customers even when full issuance is paused</label></td></tr>
+		<tr><th scope="row"><label for="gn-customer-list">New customer Mail Mint list</label></th><td><select id="gn-customer-list" name="gn_coupons_settings[customer_list]"><option value="0">No list</option><?php foreach ( $lists as $list ) : ?><option value="<?php echo esc_attr( $list['id'] ); ?>" <?php selected( $s['customer_list'], $list['id'] ); ?>><?php echo esc_html( $list['title'] ); ?></option><?php endforeach; ?></select></td></tr>
 		<tr><th scope="row">Mail Mint lists</th><td><fieldset class="gn-options"><?php foreach ( $lists as $list ) : ?>
 		<label><input type="checkbox" name="gn_coupons_settings[lists][]" value="<?php echo esc_attr( $list['id'] ); ?>" <?php checked( in_array( (int) $list['id'], $s['lists'], true ) ); ?>> <?php echo esc_html( $list['title'] ); ?></label>
 		<?php endforeach; if ( ! $lists ) { echo '<p>No Mail Mint lists available.</p>'; } ?></fieldset></td></tr>
@@ -108,7 +113,7 @@ class Gn_In_Store_Coupons_Admin {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY id DESC LIMIT 25 OFFSET %d", ( $page - 1 ) * 25 ) );
 		?>
 		<div class="wrap gn-coupons"><h1>In-Store Coupons</h1>
-		<p><strong><?php echo Gn_In_Store_Coupons_Store::settings()['enabled'] ? 'Automatic issuance enabled' : 'Automatic issuance paused'; ?></strong></p>
+		<p><strong><?php $s = Gn_In_Store_Coupons_Store::settings(); echo $s['enabled'] ? 'Automatic issuance enabled' : ( $s['customer_enabled'] ? 'New customer issuance enabled; list issuance paused' : 'Automatic issuance paused' ); ?></strong></p>
 		<nav class="nav-tab-wrapper" aria-label="Coupon status"><?php foreach ( array( 'valid', 'redeemed', 'expired', 'revoked', 'all' ) as $tab ) : ?>
 		<a class="nav-tab <?php echo $tab === $status ? 'nav-tab-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array( 'page' => 'gn-in-store-coupons', 'status' => $tab ), admin_url( 'admin.php' ) ) ); ?>"><?php echo esc_html( ucfirst( $tab ) ); ?></a>
 		<?php endforeach; ?></nav>

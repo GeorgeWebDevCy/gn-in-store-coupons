@@ -3,7 +3,7 @@ Tags: woocommerce, coupons
 Requires PHP: 7.4
 Requires at least: 6.5
 Requires Plugins: woocommerce, mail-mint
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,14 @@ unless linked to the same WordPress account. Coupon records and settings are
 retained on uninstall to avoid accidentally resetting lifetime eligibility.
 
 == Configuration ==
+
+New customer issuance can be enabled separately from full automatic issuance.
+My Account and checkout registrations use WooCommerce's customer-created event.
+Choose a new-customer Mail Mint list to add these customers without activating
+list-wide coupon emails. New CRM contacts are pending; existing marketing consent
+and unsubscribe statuses are preserved. Account creation alone is not newsletter
+opt-in. Coupon email delivery is independent of newsletter subscription status.
+List sync failures retry up to three times without reissuing an existing coupon.
 
 Issuance starts paused. In In-Store Coupons > Settings, choose the coupon amount and minimum purchase,
 validity (0 means no expiry), branding and Mail Mint
@@ -70,6 +78,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.4.0 =
+* Add new-customer-only coupon issuance and Mail Mint list assignment for WooCommerce registrations.
+* Preserve existing contact status and prevent duplicate coupons on registration retries.
 
 = 1.3.0 =
 * Add Greek and English social PNGs in square and story formats, with matching captions in settings.

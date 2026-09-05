@@ -79,9 +79,9 @@ class Gn_In_Store_Coupons {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->loader->add_action( 'init', $this, 'initialize_coupons' );
-		$this->loader->add_action( 'woocommerce_created_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer' );
+		$this->loader->add_action( 'woocommerce_created_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer', 20 );
 		$this->loader->add_action( 'user_register', 'Gn_In_Store_Coupons_Eligibility', 'registration' );
-		$this->loader->add_action( 'gn_coupons_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer' );
+		$this->loader->add_action( 'gn_coupons_customer', 'Gn_In_Store_Coupons_Eligibility', 'customer', 10, 2 );
 		$this->loader->add_action( 'mailmint_list_applied', 'Gn_In_Store_Coupons_Eligibility', 'list_applied', 10, 2 );
 		$this->loader->add_action( 'mint_subscriber_status_to_subscribed', 'Gn_In_Store_Coupons_Eligibility', 'contact' );
 		$this->loader->add_action( 'gn_coupons_scan', 'Gn_In_Store_Coupons_Eligibility', 'scan' );

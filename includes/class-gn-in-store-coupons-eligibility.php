@@ -3,25 +3,61 @@
 class Gn_In_Store_Coupons_Eligibility {
 
 	public static function ready() {
-		return class_exists( 'WooCommerce' ) && class_exists( '\Mint\MRM\DataBase\Models\ContactModel' ) && class_exists( '\Mint\MRM\DataBase\Models\ContactGroupModel' );
+		return class_exists( 'WooCommerce' ) && class_exists( '\Mint\MRM\DataBase\Models\ContactModel' ) && class_exists( '\Mint\MRM\DataBase\Models\ContactGroupModel' ) && class_exists( '\Mint\MRM\DataBase\Models\ContactGroupPivotModel' ) && class_exists( '\Mint\MRM\DataStores\ContactData' );
 	}
 
 	public static function lists() {
 		return self::ready() ? (array) \Mint\MRM\DataBase\Models\ContactGroupModel::get_all_lists_or_tags( 'lists' ) : array();
 	}
 
-	public static function customer( $id ) {
-		if ( ! self::ready() ) {
+	public static function customer( $id, $attempt = 0 ) {
+		$settings = Gn_In_Store_Coupons_Store::settings();
+		if ( ! $settings['enabled'] && ! $settings['customer_enabled'] ) {
 			return;
 		}
 		$user = get_userdata( $id );
-		if ( $user && in_array( 'customer', (array) $user->roles, true ) ) {
-			Gn_In_Store_Coupons_Store::issue( $user->user_email, $user->display_name, 'woocommerce', $id );
+		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) { return; }
+		$synced = false;
+		$result = new WP_Error( 'dependencies', 'Coupon dependencies unavailable.' );
+		if ( self::ready() ) {
+			try {
+				$synced = self::sync_customer( $user, (int) $settings['customer_list'] );
+			} catch ( \Throwable $error ) {
+				$synced = false;
+			}
+			$result = Gn_In_Store_Coupons_Store::issue( $user->user_email, $user->display_name, 'woocommerce', $id );
+		}
+		$failed = ! $synced || ( is_wp_error( $result ) && 'already_issued' !== $result->get_error_code() );
+		if ( $failed && $attempt < 3 ) {
+			$args = array( (int) $id, (int) $attempt + 1 );
+			if ( ! wp_next_scheduled( 'gn_coupons_customer', $args ) ) {
+				wp_schedule_single_event( time() + 60 * ( $attempt + 1 ), 'gn_coupons_customer', $args );
+			}
 		}
 	}
 
+	public static function sync_customer( $user, $list_id ) {
+		if ( ! $list_id ) { return true; }
+		if ( ! in_array( $list_id, array_map( 'intval', wp_list_pluck( self::lists(), 'id' ) ), true ) ) { return false; }
+		$email = strtolower( trim( $user->user_email ) );
+		$id = \Mint\MRM\DataBase\Models\ContactModel::get_id_by_email( $email );
+		if ( ! $id ) {
+			// Account creation is not newsletter consent. Existing statuses are never overwritten.
+			$data = new \Mint\MRM\DataStores\ContactData( $email, array(
+				'first_name' => $user->first_name, 'last_name' => $user->last_name,
+				'wp_user_id' => $user->ID, 'source' => 'WooCommerce', 'status' => 'pending',
+			) );
+			$id = \Mint\MRM\DataBase\Models\ContactModel::insert( $data );
+		}
+		if ( ! $id ) { return false; }
+		\Mint\MRM\DataBase\Models\ContactGroupPivotModel::add_groups_to_contact( array( array( 'contact_id' => (int) $id, 'group_id' => $list_id ) ) );
+		$groups = \Mint\MRM\DataBase\Models\ContactGroupPivotModel::get_groups_to_contact( $id );
+		return in_array( $list_id, array_map( 'intval', wp_list_pluck( (array) $groups, 'group_id' ) ), true );
+	}
+
 	public static function registration( $id ) {
-		if ( Gn_In_Store_Coupons_Store::settings()['enabled'] ) {
+		$s = Gn_In_Store_Coupons_Store::settings();
+		if ( $s['enabled'] || $s['customer_enabled'] ) {
 			wp_schedule_single_event( time() + 60, 'gn_coupons_customer', array( (int) $id ) );
 		}
 	}
@@ -52,10 +88,10 @@ class Gn_In_Store_Coupons_Eligibility {
 
 	public static function scan() {
 		$settings = Gn_In_Store_Coupons_Store::settings();
-		if ( ! self::ready() || ! $settings['enabled'] ) {
+		if ( ! self::ready() ) {
 			return;
 		}
-		if ( $settings['lists'] ) {
+		if ( $settings['enabled'] && $settings['lists'] ) {
 			$offset = (int) get_option( 'gn_coupons_scan_offset', 0 );
 			$result = \Mint\MRM\DataBase\Models\ContactModel::get_filtered_contacts( array( 'subscribed' ), array(), $settings['lists'], 50, $offset );
 			if ( is_array( $result ) && isset( $result['data'] ) ) {
