@@ -130,7 +130,12 @@ class Gn_In_Store_Coupons_Eligibility {
 			LIMIT 50", $campaign
 		) );
 		foreach ( (array) $rows as $row ) {
-			Gn_In_Store_Coupons_Store::issue( $row->email_address, trim( $row->first_name . ' ' . $row->last_name ), 'mail_mint_campaign', (int) $row->user_id );
+			$name = trim( $row->first_name . ' ' . $row->last_name );
+			if ( ! $name && $row->user_id ) {
+				$user = get_userdata( $row->user_id );
+				if ( $user ) { $name = trim( $user->first_name . ' ' . $user->last_name ) ?: $user->display_name; }
+			}
+			Gn_In_Store_Coupons_Store::issue( $row->email_address, $name, 'mail_mint_campaign', (int) $row->user_id );
 		}
 		Gn_In_Store_Coupons_Store::send_pending();
 		$pending = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}mint_broadcast_emails WHERE campaign_id = %d AND status IN ('scheduled','sending') LIMIT 1", $campaign ) );
