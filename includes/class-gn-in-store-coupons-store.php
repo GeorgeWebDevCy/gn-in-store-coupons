@@ -152,7 +152,9 @@ class Gn_In_Store_Coupons_Store {
 			$offer = json_decode( $coupon->offer, true );
 			$body = '<h1>' . esc_html( $offer['brand'] ) . '</h1><p>Your in-store coupon is ready.</p><p><strong>' . esc_html( $offer['discount'] ) . '% off</strong></p>';
 			$body .= '<p>Code: <strong>' . esc_html( $coupon->code ) . '</strong></p><p><a href="' . esc_url( self::url( $coupon ) ) . '">View your coupon</a></p>';
-			$body .= '<p>Categories: ' . esc_html( implode( ', ', $offer['categories'] ) ?: 'All product categories' ) . '</p>';
+			if ( ! empty( $offer['categories'] ) ) {
+				$body .= '<p>Categories: ' . esc_html( implode( ', ', $offer['categories'] ) ) . '</p>';
+			}
 			$body .= '<p>' . ( $coupon->expires_at ? 'Valid until ' . esc_html( get_date_from_gmt( $coupon->expires_at, 'j M Y H:i' ) ) : 'No expiry date' ) . '</p>';
 			if ( $offer['logo'] ) { $body = '<p><img width="180" src="' . esc_url( $offer['logo'] ) . '" alt="' . esc_attr( $offer['brand'] ) . '"></p>' . $body; }
 			$body .= '<p>' . esc_html( $offer['terms'] ) . '</p><p>In-store use only. This code does not work at online checkout.</p>';
