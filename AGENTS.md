@@ -31,6 +31,10 @@ verified information changes how future work should be done.
 
 ## Plugin Updates
 
+- Activation requires WooCommerce (woocommerce) and Mail Mint (mail-mint),
+  declared in the bootstrap Requires Plugins header. WordPress 6.5 is the minimum
+  for native dependency enforcement. Mail Mint Pro is optional, not a substitute.
+
 - GitHub updates are registered on plugins_loaded in gn-in-store-coupons.php.
   The source is GeorgeWebDevCy/gn-in-store-coupons with main as the fallback branch.
 - Plugin Update Checker 5.7 is bundled in includes/plugin-update-checker as a

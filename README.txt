@@ -1,7 +1,9 @@
 === GN In-Store Coupons ===
 Tags: woocommerce, coupons
 Requires PHP: 5.6.20
-Stable tag: 1.0.1
+Requires at least: 6.5
+Requires Plugins: woocommerce, mail-mint
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,8 +16,12 @@ foundation and GitHub update support; coupon functionality is not yet implemente
 
 == Installation ==
 
-1. Upload the gn-in-store-coupons directory to wp-content/plugins/.
-2. Activate GN In-Store Coupons through the Plugins screen in WordPress.
+1. Use WordPress 6.5 or newer and install and activate WooCommerce and Mail Mint.
+2. Upload the gn-in-store-coupons directory to wp-content/plugins/.
+3. Activate GN In-Store Coupons through the Plugins screen in WordPress.
+
+WordPress blocks activation until both required plugins are installed and active.
+Mail Mint Pro is optional and does not replace the required Mail Mint plugin.
 
 == Updates ==
 
@@ -31,6 +37,10 @@ version tag, and falls back to the main branch when neither is available.
 Update packages use GitHub source archives and include the bundled updater.
 
 == Changelog ==
+
+= 1.0.2 =
+* Require WooCommerce and Mail Mint through WordPress native plugin dependencies.
+* Require WordPress 6.5 or newer for dependency enforcement.
 
 = 1.0.1 =
 * Integrate Plugin Update Checker 5.7 for GitHub-hosted WordPress updates.
